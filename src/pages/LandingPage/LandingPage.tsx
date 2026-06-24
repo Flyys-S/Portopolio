@@ -3,6 +3,7 @@ import TextPressure from "../../components/TextPressure";
 import TextType from "../../components/TextType";
 import ProjectsPage from "../ProjectsPage/ProjectsPage";
 import { playPageTransition } from "../../utils/transition";
+import FullMenu from "../../components/FullMenu";
 import './LandingPage.css';
 
 export default function LandingPage() {
@@ -41,6 +42,25 @@ export default function LandingPage() {
         );
     };
 
+    const handleNavigate = (view: 'home' | 'project' | 'about' | 'contact') => {
+        if (view === 'home' || view === 'project') {
+            navigateTo(view);
+        } else {
+            // For about and contact, we go to home view and scroll/hash
+            navigateTo('home');
+            setTimeout(() => {
+                const element = document.getElementById(view);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    window.location.hash = view;
+                }
+            }, 500);
+        }
+    };
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
     return (
         <>
             {/* Staggered Transition Overlay */}
@@ -53,6 +73,22 @@ export default function LandingPage() {
                 {/* @ts-expect-error spline-viewer is a custom web component not defined in standard React types */}
                 <spline-viewer url={splineSceneUrl}></spline-viewer>
             </div>
+
+            {/* Menu Toggle Button */}
+            <div className="global-nav-trigger interactive">
+                <button className="menu-open-btn" onClick={() => setIsMenuOpen(true)} aria-label="Open menu">
+                    <span className="open-btn-circle">
+                        <span className="menu-btn-line line-top"></span>
+                        <span className="menu-btn-line line-bottom"></span>
+                    </span>
+                </button>
+            </div>
+
+            <FullMenu 
+                isOpen={isMenuOpen} 
+                onClose={() => setIsMenuOpen(false)} 
+                onNavigate={handleNavigate} 
+            />
 
             {currentView === 'home' ? (
                 <div className="app-layout">
@@ -75,16 +111,6 @@ export default function LandingPage() {
                             />
                         </div>
                     </header>
-                    <main className="main-content">
-                        <nav className="interactive">
-                            <ul className="nav-menu">
-                                <li><a href="#home" className="nav-link" onClick={(e) => { e.preventDefault(); navigateTo('home'); }}>Home</a></li>
-                                <li><a href="#project" className="nav-link" onClick={(e) => { e.preventDefault(); navigateTo('project'); }}>Project</a></li>
-                                <li><a href="#about" className="nav-link">About</a></li>
-                                <li><a href="#contact" className="nav-link">Contact</a></li>
-                            </ul>
-                        </nav>
-                    </main>
                     <footer className="interactive">
                         <div className="footer-socials">
                             <a href="https://instagram.com" target="_blank" rel="noreferrer" className="social-link">Instagram</a>

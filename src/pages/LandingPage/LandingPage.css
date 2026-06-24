@@ -154,3 +154,55 @@
   transform: translateX(-100%);
   will-change: transform;
 }
+
+/* Global Nav Menu Trigger Button */
+.global-nav-trigger {
+  position: fixed;
+  top: 3rem;
+  right: 4rem;
+  z-index: 1000;
+}
+
+.menu-open-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+}
+
+.open-btn-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #d39700ff; /* Orange matching menu design */
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.open-btn-circle:hover {
+  transform: scale(1.08);
+}
+
+.menu-btn-line {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.line-top {
+  top: calc(50% - 4px);
+}
+
+.line-bottom {
+  top: calc(50% + 2px);
+}
+
+

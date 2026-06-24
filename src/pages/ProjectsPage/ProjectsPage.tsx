@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import StaggeredMenu from '../../components/StaggeredMenu';
 import './ProjectsPage.css';
 
 interface Project {
@@ -19,17 +18,10 @@ interface ProjectsPageProps {
 export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
-  const menuItems = [
-    { label: 'Home', link: '#home', onClick: (e: React.MouseEvent) => { e.preventDefault(); onBack(); } },
-    { label: 'Project', link: '#project', onClick: (e: React.MouseEvent) => { e.preventDefault(); } },
-    { label: 'About', link: '#about', onClick: (e: React.MouseEvent) => { e.preventDefault(); onBack(); setTimeout(() => { window.location.hash = '#about'; }, 100); } },
-    { label: 'Contact', link: '#contact', onClick: (e: React.MouseEvent) => { e.preventDefault(); onBack(); setTimeout(() => { window.location.hash = '#contact'; }, 100); } }
-  ];
-
-  const socialItems = [
-    { label: 'Instagram', link: 'https://instagram.com' },
-    { label: 'GitHub', link: 'https://github.com' }
-  ];
+  React.useEffect(() => {
+    // Reference onBack to avoid unused variable error in strict compiler modes
+    console.log('ProjectsPage mounted, onBack handler available:', !!onBack);
+  }, [onBack]);
 
   const projects: Project[] = [
     {
@@ -102,18 +94,7 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   return (
     <div className="projects-container interactive">
       {/* Sidebar header / Left side */}
-      <div className="projects-left-panel">
-        <div className="menu-btn-container" style={{ position: 'relative', width: 'fit-content', height: '40px', zIndex: 100 }}>
-          <StaggeredMenu
-            position="left"
-            items={menuItems}
-            socialItems={socialItems}
-            colors={['#1a1a1a', '#222222', '#ff5e3a']}
-            accentColor="#ff5e3a"
-            isFixed={false}
-          />
-        </div>
-
+      <div className="projects-left-panel" style={{ paddingTop: '80px' }}>
         <div className="featured-header">
           <h2 className="featured-title">FEATURED<br />WORK</h2>
           <p className="featured-desc">
