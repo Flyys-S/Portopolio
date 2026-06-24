@@ -60,6 +60,15 @@ export default function LandingPage() {
     };
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [loadSpline, setLoadSpline] = useState(false);
+
+    useEffect(() => {
+        // Delay Spline load to allow the main thread to complete initial paints
+        const timer = setTimeout(() => {
+            setLoadSpline(true);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, []);
 
     return (
         <>
@@ -70,8 +79,10 @@ export default function LandingPage() {
                 <div className="transition-layer" style={{ background: '#ff5e3a', zIndex: 8 }} />
             </div>
             <div className="spline-wrapper">
-                {/* @ts-expect-error spline-viewer is a custom web component not defined in standard React types */}
-                <spline-viewer url={splineSceneUrl}></spline-viewer>
+                {currentView === 'home' && loadSpline && (
+                    /* @ts-expect-error spline-viewer is a custom web component not defined in standard React types */
+                    <spline-viewer url={splineSceneUrl}></spline-viewer>
+                )}
             </div>
 
             {/* Menu Toggle Button */}
