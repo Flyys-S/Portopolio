@@ -1,27 +1,7 @@
 // Component ported from https://codepen.io/JuanFuentes/full/rgXKGQ
 
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-
-const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  return Math.sqrt(dx * dx + dy * dy);
-};
-
-const getAttr = (distance: number, maxDist: number, minVal: number, maxVal: number) => {
-  const val = maxVal - Math.abs((maxVal * distance) / maxDist);
-  return Math.max(minVal, val + minVal);
-};
-
-const debounce = (func: (...args: any[]) => void, delay: number) => {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  return (...args: any[]) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func(...args);
-    }, delay);
-  };
-};
+import { calculateDistance as dist, getProportionalAttr as getAttr, debounce } from '../utils/helpers';
 
 interface TextPressureProps {
   text?: string;
@@ -211,7 +191,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
         }
       `}</style>
     );
-  }, [fontFamily, fontUrl, textColor, strokeColor, strokeWidth]);
+  }, [fontUrl, textColor, strokeColor, strokeWidth]);
 
   return (
     <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-transparent">

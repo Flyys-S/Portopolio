@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, createElement, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { gsap } from 'gsap';
 
 interface TextTypeProps {
@@ -20,7 +20,7 @@ interface TextTypeProps {
   onSentenceComplete?: (sentence: string, index: number) => void;
   startOnVisible?: boolean;
   reverseMode?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const TextType: React.FC<TextTypeProps> = ({
@@ -170,27 +170,28 @@ const TextType: React.FC<TextTypeProps> = ({
     onSentenceComplete
   ]);
 
+  const CustomComponent = Component;
   const shouldHideCursor =
     hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
 
-  return createElement(
-    Component,
-    {
-      ref: containerRef,
-      className: `inline-block whitespace-pre-wrap tracking-tight ${className}`,
-      ...props
-    },
-    <span className="inline" style={{ color: getCurrentTextColor() || 'inherit' }}>
-      {displayedText}
-    </span>,
-    showCursor && (
-      <span
-        ref={cursorRef}
-        className={`ml-1 inline-block opacity-100 ${shouldHideCursor ? 'hidden' : ''} ${cursorClassName}`}
-      >
-        {cursorCharacter}
+  return (
+    <CustomComponent
+      ref={containerRef as React.Ref<HTMLElement>}
+      className={`inline-block whitespace-pre-wrap tracking-tight ${className}`}
+      {...props}
+    >
+      <span className="inline" style={{ color: getCurrentTextColor() || 'inherit' }}>
+        {displayedText}
       </span>
-    )
+      {showCursor && (
+        <span
+          ref={cursorRef}
+          className={`ml-1 inline-block opacity-100 ${shouldHideCursor ? 'hidden' : ''} ${cursorClassName}`}
+        >
+          {cursorCharacter}
+        </span>
+      )}
+    </CustomComponent>
   );
 };
 
