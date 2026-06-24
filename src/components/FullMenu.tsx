@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
+import { findClosestEdge } from '../utils/helpers';
 import './FullMenu.css';
 
 interface FullMenuProps {
@@ -24,11 +25,7 @@ function MenuItem({ text, marqueeText, num, view, onNavigate, onClose }: MenuIte
 
     const animationDefaults = { duration: 0.6, ease: 'expo.out' };
 
-    const findClosestEdge = (mouseX: number, mouseY: number, width: number, height: number) => {
-        const topEdgeDist = (mouseX - width / 2) ** 2 + mouseY ** 2;
-        const bottomEdgeDist = (mouseX - width / 2) ** 2 + (mouseY - height) ** 2;
-        return topEdgeDist < bottomEdgeDist ? 'top' : 'bottom';
-    };
+
 
     const handleMouseEnter = (ev: React.MouseEvent<HTMLAnchorElement>) => {
         if (!itemRef.current || !marqueeRef.current || !marqueeInnerRef.current) return;

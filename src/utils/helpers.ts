@@ -35,3 +35,18 @@ export const debounce = <T extends (...args: unknown[]) => void>(func: T, delay:
     }, delay);
   };
 };
+
+/**
+ * Finds the closest edge of a rectangle (top or bottom) to a given coordinate.
+ */
+export const findClosestEdge = (
+  mouseX: number,
+  mouseY: number,
+  width: number,
+  height: number
+): 'top' | 'bottom' => {
+  const topEdgeDist = (mouseX - width / 2) ** 2 + mouseY ** 2;
+  const bottomEdgeDist = (mouseX - width / 2) ** 2 + (mouseY - height) ** 2;
+  return topEdgeDist < bottomEdgeDist ? 'top' : 'bottom';
+};
+
