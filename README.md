@@ -1,75 +1,66 @@
-# React + TypeScript + Vite
+# RRS — Personal Portfolio website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A premium, highly interactive personal portfolio website designed for digital developers and creators. Built with high-performance animations, direction-aware overlays, and interactive 3D elements.
 
-Currently, two official plugins are available:
+## 🚀 Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+*   **3D Spline Interactive Scene**: High-performance interactive background scene at the core of the landing page.
+*   **Grid Menu System Overlay**: A full-screen overlay grid menu featuring 5 vertical columns, dynamic local time clock, and clean typography.
+*   **Direction-Aware Flowing Menu**: Interactive hover animations inside menu rows that slide marquee titles (`GET TO KNOW ME`, `CREATIVE WORK`, `GET IN TOUCH`) in/out depending on cursor coordinates.
+*   **Horizontal Project Accordion Layout**: Accordion-based column showcases on the Projects page. Expanding a column reveals detail summaries, checklists, and visual project previews with fluid cubic-bezier transitions.
+*   **Directional Page Transitions**: Layered panel sweep transitions that shift dynamically from right-to-left or left-to-right depending on spatial navigation direction.
+*   **Full URL Hash Syncing**: Page states map directly to `#home`, `#project`, `#about`, and `#contact` hashes to support native browser forward/back buttons.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Technology Stack
 
-## Expanding the ESLint configuration
+*   **Core Framework**: React 19 + TypeScript + Vite
+*   **Animation**: GSAP (GreenSock Animation Platform) + CSS Keyframes
+*   **3D Integration**: Spline Viewer Runtime
+*   **Styles**: Vanilla CSS
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📁 Directory Structure
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+For a full breakdown of directories and files, please refer to [path_documentation.md](file:///c:/Users/rafly/Documents/GitHub/Portopolio/Docs/path_documentation.md).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+├── Docs/                  # Project documentation & session logs
+├── public/                # Static public assets
+└── src/
+    ├── assets/            # Global media assets & images
+    ├── components/        # Reusable UI components (FullMenu, TextPressure, etc.)
+    ├── pages/             # Co-located Page modules (LandingPage, ProjectsPage)
+    ├── service/           # Integration clients
+    └── utils/             # Reusable scripts (helpers, transition timelines)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚙️ Getting Started
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Installation
+Install all dependencies:
+```bash
+npm install
+```
 
+### 2. Development Server
+Start the local server with hot module replacement (HMR):
+```bash
+npm run dev
+```
+
+### 3. Production Build
+Verify type-safety and compile the application for production:
+```bash
+npm run build
+```
+
+### 4. Code Quality
+Run ESLint to verify codebase standards:
+```bash
+npm run lint
 ```
