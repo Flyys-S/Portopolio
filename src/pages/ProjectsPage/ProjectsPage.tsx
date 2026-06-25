@@ -38,14 +38,47 @@ interface ProjectCardProps {
   project: Project;
   isActive: boolean;
   onClick: () => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
-function ProjectCard({ project, isActive, onClick }: ProjectCardProps) {
+function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const collapsedRef = useRef<HTMLDivElement>(null);
   const orangeRef = useRef<HTMLDivElement>(null);
   const orangeInnerRef = useRef<HTMLDivElement>(null);
 
   const animationDefaults = { duration: 0.6, ease: 'expo.out' };
+
+  React.useEffect(() => {
+    const card = cardRef.current;
+    const container = containerRef.current;
+    if (!card || !container) return;
+
+    const anim = gsap.fromTo(
+      card,
+      {
+        x: 100,
+        opacity: 0
+      },
+      {
+        x: 0,
+        opacity: 1,
+        scrollTrigger: {
+          trigger: card,
+          scroller: container,
+          horizontal: true,
+          start: 'left right-=80px',
+          end: 'left center+=100px',
+          scrub: 1
+        }
+      }
+    );
+
+    return () => {
+      anim.scrollTrigger?.kill();
+      anim.kill();
+    };
+  }, [containerRef]);
 
   const handleMouseEnter = (ev: React.MouseEvent) => {
     if (!collapsedRef.current || !orangeRef.current || !orangeInnerRef.current) return;
@@ -109,6 +142,7 @@ function ProjectCard({ project, isActive, onClick }: ProjectCardProps) {
   return (
     <div
       className={`project-card ${isActive ? 'active' : ''}`}
+      ref={cardRef}
       style={{ '--accent-color': project.color } as React.CSSProperties}
     >
       {/* Vertical border stripe indicator */}
@@ -333,6 +367,7 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
           project={project}
           isActive={activeProjectId === project.id}
           onClick={() => handleCardClick(project.id, idx)}
+          containerRef={containerRef}
         />
       ))}
     </div>

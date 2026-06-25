@@ -56,15 +56,15 @@ export default function ScrollFloat({
     tl.fromTo(
       spans,
       {
-        y: 0,
+        x: 0,
         opacity: 1,
         rotate: 0,
         scale: 1
       },
       {
-        y: -100,
+        x: -150,
         opacity: 0,
-        rotate: 15,
+        rotate: -15,
         scale: 0.8,
         stagger: stagger,
         duration: animationDuration,
