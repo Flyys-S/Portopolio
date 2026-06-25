@@ -173,20 +173,19 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
     setActiveProjectId(isOpening ? id : null);
 
     if (isOpening && containerRef.current) {
-      const cardWidth = 140;
-      const gap = 8;
-      const sidebarWidth = 400;
-      const leftMargin = 32;
-      const targetScroll = sidebarWidth + leftMargin + idx * (cardWidth + gap);
-
       setTimeout(() => {
         if (containerRef.current) {
-          containerRef.current.scrollTo({
-            left: targetScroll,
-            behavior: 'smooth'
-          });
+          const cards = containerRef.current.querySelectorAll('.project-card');
+          const clickedCard = cards[idx] as HTMLElement;
+          if (clickedCard) {
+            const targetScroll = clickedCard.offsetLeft - 32;
+            containerRef.current.scrollTo({
+              left: targetScroll,
+              behavior: 'smooth'
+            });
+          }
         }
-      }, 100);
+      }, 150);
     }
   };
 

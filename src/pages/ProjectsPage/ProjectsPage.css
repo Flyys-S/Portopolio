@@ -26,7 +26,8 @@
   flex-direction: column;
   justify-content: flex-start;
   gap: 5rem;
-  width: 400px;
+  width: 32vw;
+  min-width: 500px;
   flex-shrink: 0;
   height: 100%;
   padding: 3rem 0 3rem 4rem;
