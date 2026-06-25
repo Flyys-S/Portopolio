@@ -89,6 +89,9 @@ function MenuItem({ text, marqueeText, num, view, onNavigate, onClose }: MenuIte
 
 export default function FullMenu({ isOpen, onClose, onNavigate }: FullMenuProps) {
     const [localTime, setLocalTime] = useState('');
+    const [isRendered, setIsRendered] = useState(isOpen);
+    const orangePanelRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const updateTime = () => {
@@ -102,85 +105,120 @@ export default function FullMenu({ isOpen, onClose, onNavigate }: FullMenuProps)
         return () => clearInterval(timer);
     }, []);
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        if (isOpen) {
+            setIsRendered(true);
+        } else if (isRendered) {
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    setIsRendered(false);
+                }
+            });
+            // Staggered clip-path shrink back to center line (50%)
+            tl.to(contentRef.current, { clipPath: 'inset(50% 0%)', duration: 0.7, ease: 'power3.inOut' }, 0);
+            tl.to(orangePanelRef.current, { clipPath: 'inset(50% 0%)', duration: 0.7, ease: 'power3.inOut' }, 0.1);
+        }
+    }, [isOpen, isRendered]);
+
+    useEffect(() => {
+        if (isRendered && isOpen) {
+            requestAnimationFrame(() => {
+                const tl = gsap.timeline();
+                tl.set([orangePanelRef.current, contentRef.current], { 
+                    clipPath: 'inset(50% 0%)',
+                    visibility: 'visible'
+                });
+                
+                // Staggered clip-path reveal from center line
+                tl.to(orangePanelRef.current, { clipPath: 'inset(0% 0%)', duration: 0.8, ease: 'power3.inOut' }, 0);
+                tl.to(contentRef.current, { clipPath: 'inset(0% 0%)', duration: 0.8, ease: 'power3.inOut' }, 0.1);
+            });
+        }
+    }, [isRendered, isOpen]);
+
+    if (!isRendered) return null;
 
     return (
         <div className={`full-menu-overlay ${isOpen ? 'open' : ''}`}>
-            {/* Background grid lines */}
-            <div className="grid-lines-container">
-                <div className="grid-col-line line-1" />
-                <div className="grid-col-line line-2" />
-                <div className="grid-col-line line-3" />
-                <div className="grid-col-line line-4" />
-                <div className="grid-col-line line-5" />
-            </div>
+            {/* Orange background panel */}
+            <div className="menu-transition-bg" ref={orangePanelRef} style={{ background: '#ff5e3a' }} />
 
-            <header className="menu-header">
-                <div className="menu-logo-container" onClick={() => { onNavigate('home'); onClose(); }}>
-                    <span className="menu-logo-text">RRS</span>
-                </div>
-                <button className="menu-close-btn" onClick={onClose} aria-label="Close menu">
-                    <span className="close-btn-circle">
-                        <span className="close-btn-x">×</span>
-                    </span>
-                </button>
-            </header>
-
-            <nav className="menu-nav-links">
-                <MenuItem
-                    text="ABOUT"
-                    marqueeText="GET TO KNOW ME"
-                    num="01"
-                    view="about"
-                    onNavigate={onNavigate}
-                    onClose={onClose}
-                />
-                <MenuItem
-                    text="PROJECTS"
-                    marqueeText="CREATIVE WORK"
-                    num="02"
-                    view="project"
-                    onNavigate={onNavigate}
-                    onClose={onClose}
-                />
-                <MenuItem
-                    text="CONTACT"
-                    marqueeText="GET IN TOUCH"
-                    num="03"
-                    view="contact"
-                    onNavigate={onNavigate}
-                    onClose={onClose}
-                />
-            </nav>
-
-            <footer className="menu-footer">
-                <div className="footer-col col-bio">
-                    <p className="bio-paragraph">
-                        My work is driven by clarity, performance, and attention to detail. I focus on creating reliable digital experiences that feel simple, fast, and intentional.
-                    </p>
-                    <span className="copyright-text">©2026 All Rights Reserved</span>
+            <div className="menu-content-wrapper" ref={contentRef}>
+                <div className="grid-lines-container">
+                    <div className="grid-col-line line-1" />
+                    <div className="grid-col-line line-2" />
+                    <div className="grid-col-line line-3" />
+                    <div className="grid-col-line line-4" />
+                    <div className="grid-col-line line-5" />
                 </div>
 
-                <div className="footer-col col-empty" />
-
-                <div className="footer-col col-moon">
-                    <div className="moon-sphere" />
-                </div>
-
-                <div className="footer-col col-contact">
-                    <a href="mailto:example@domain.com" className="email-link">example@domain.com</a>
-                    <span className="location-text">City, Country</span>
-                </div>
-
-                <div className="footer-col col-socials">
-                    <div className="socials-links-row">
-                        <a href="https://instagram.com" target="_blank" rel="noreferrer">instagram</a>
-                        <a href="https://linkedin.com" target="_blank" rel="noreferrer">linkedin</a>
-                        <a href="https://dribbble.com" target="_blank" rel="noreferrer">dribbble</a>
+                <header className="menu-header">
+                    <div className="menu-logo-container" onClick={() => { onNavigate('home'); onClose(); }}>
+                        <span className="menu-logo-text">RRS</span>
                     </div>
-                    <span className="time-text">Local time — {localTime}</span>
-                </div>
-            </footer>
+                    <button className="menu-close-btn" onClick={onClose} aria-label="Close menu">
+                        <span className="close-btn-circle">
+                            <span className="close-btn-x">×</span>
+                        </span>
+                    </button>
+                </header>
+
+                <nav className="menu-nav-links">
+                    <MenuItem
+                        text="ABOUT"
+                        marqueeText="GET TO KNOW ME"
+                        num="01"
+                        view="about"
+                        onNavigate={onNavigate}
+                        onClose={onClose}
+                    />
+                    <MenuItem
+                        text="PROJECTS"
+                        marqueeText="CREATIVE WORK"
+                        num="02"
+                        view="project"
+                        onNavigate={onNavigate}
+                        onClose={onClose}
+                    />
+                    <MenuItem
+                        text="CONTACT"
+                        marqueeText="GET IN TOUCH"
+                        num="03"
+                        view="contact"
+                        onNavigate={onNavigate}
+                        onClose={onClose}
+                    />
+                </nav>
+
+                <footer className="menu-footer">
+                    <div className="footer-col col-bio">
+                        <p className="bio-paragraph">
+                            My work is driven by clarity, performance, and attention to detail. I focus on creating reliable digital experiences that feel simple, fast, and intentional.
+                        </p>
+                        <span className="copyright-text">©2026 All Rights Reserved</span>
+                    </div>
+
+                    <div className="footer-col col-empty" />
+
+                    <div className="footer-col col-moon">
+                        <div className="moon-sphere" />
+                    </div>
+
+                    <div className="footer-col col-contact">
+                        <a href="mailto:example@domain.com" className="email-link">example@domain.com</a>
+                        <span className="location-text">City, Country</span>
+                    </div>
+
+                    <div className="footer-col col-socials">
+                        <div className="socials-links-row">
+                            <a href="https://instagram.com" target="_blank" rel="noreferrer">instagram</a>
+                            <a href="https://linkedin.com" target="_blank" rel="noreferrer">linkedin</a>
+                            <a href="https://dribbble.com" target="_blank" rel="noreferrer">dribbble</a>
+                        </div>
+                        <span className="time-text">Local time — {localTime}</span>
+                    </div>
+                </footer>
+            </div>
         </div>
     );
 }

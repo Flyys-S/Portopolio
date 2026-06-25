@@ -133,7 +133,6 @@ const TextPressure: React.FC<TextPressureProps> = ({
   useEffect(() => {
     let rafId: number;
     const animate = () => {
-      // Speed up interpolation from /15 to /6 to make mouse tracking feel much faster and less delayed
       mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 6;
       mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 6;
 
@@ -144,22 +143,33 @@ const TextPressure: React.FC<TextPressureProps> = ({
         spansRef.current.forEach((span, idx) => {
           if (!span) return;
 
-          // Retrieve cached position instead of calling getBoundingClientRect() every frame
           const charCenter = charPositions.current[idx] || { x: 0, y: 0 };
           const d = dist(mouseRef.current, charCenter);
 
-          const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100;
-          const wght = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
-          const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : '0';
-          const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : '1';
-
-          const newFontVariationSettings = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
-
-          if (span.style.fontVariationSettings !== newFontVariationSettings) {
-            span.style.fontVariationSettings = newFontVariationSettings;
+          // Bebas Neue is not a variable font, so we animate standard CSS properties instead
+          const isBebas = fontFamily.toLowerCase().includes('bebas');
+          
+          if (isBebas) {
+            // Apply fluid CSS transform scaling instead of variable font variation settings
+            const scaleVal = getAttr(d, maxDist, 0.75, 1.25);
+            const skewVal = getAttr(d, maxDist, 0, 10);
+            span.style.transform = `scale(${scaleVal}) skewX(${-skewVal}deg)`;
+            span.style.transition = 'transform 0.1s ease-out';
+          } else {
+            const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100;
+            const wght = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
+            const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : '0';
+            const newFontVariationSettings = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
+            if (span.style.fontVariationSettings !== newFontVariationSettings) {
+              span.style.fontVariationSettings = newFontVariationSettings;
+            }
           }
-          if (alpha && span.style.opacity !== alphaVal) {
-            span.style.opacity = alphaVal;
+
+          if (alpha) {
+            const alphaVal = getAttr(d, maxDist, 0, 1).toFixed(2);
+            if (span.style.opacity !== alphaVal) {
+              span.style.opacity = alphaVal;
+            }
           }
         });
       }
@@ -169,7 +179,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
 
     animate();
     return () => cancelAnimationFrame(rafId);
-  }, [width, weight, italic, alpha]);
+  }, [width, weight, italic, alpha, fontFamily]);
 
   const styleElement = useMemo(() => {
     return (

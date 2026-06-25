@@ -1,0 +1,97 @@
+/* Glitch Text styling in Vanilla CSS */
+.glitch-text-base {
+  color: #ffffff;
+  font-size: clamp(2.5rem, 8.5vw, 8rem);
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: 900;
+  position: relative;
+  margin: 0 auto;
+  user-select: none;
+  cursor: pointer;
+  line-height: 1.1;
+  text-align: left;
+}
+
+/* Keyframes for glitch clip-path offset animations */
+@keyframes glitch-anim {
+  0% { clip-path: inset(20% 0 50% 0); }
+  5% { clip-path: inset(10% 0 60% 0); }
+  10% { clip-path: inset(15% 0 55% 0); }
+  15% { clip-path: inset(25% 0 35% 0); }
+  20% { clip-path: inset(30% 0 40% 0); }
+  25% { clip-path: inset(40% 0 20% 0); }
+  30% { clip-path: inset(10% 0 60% 0); }
+  35% { clip-path: inset(15% 0 55% 0); }
+  40% { clip-path: inset(25% 0 35% 0); }
+  45% { clip-path: inset(30% 0 40% 0); }
+  50% { clip-path: inset(20% 0 50% 0); }
+  55% { clip-path: inset(10% 0 60% 0); }
+  60% { clip-path: inset(15% 0 55% 0); }
+  65% { clip-path: inset(25% 0 35% 0); }
+  70% { clip-path: inset(30% 0 40% 0); }
+  75% { clip-path: inset(40% 0 20% 0); }
+  80% { clip-path: inset(20% 0 50% 0); }
+  85% { clip-path: inset(10% 0 60% 0); }
+  90% { clip-path: inset(15% 0 55% 0); }
+  95% { clip-path: inset(25% 0 35% 0); }
+  100% { clip-path: inset(30% 0 40% 0); }
+}
+
+/* Always Active Mode pseudo elements */
+.glitch-active-mode::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 10px;
+  width: 100%;
+  height: 100%;
+  text-shadow: var(--after-shadow);
+  background: #0b0b0b;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  animation: glitch-anim var(--after-duration) infinite linear alternate-reverse;
+}
+
+.glitch-active-mode::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: -10px;
+  width: 100%;
+  height: 100%;
+  text-shadow: var(--before-shadow);
+  background: #0b0b0b;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  animation: glitch-anim var(--before-duration) infinite linear alternate-reverse;
+}
+
+/* Hover-Only Mode pseudo elements */
+.glitch-hover-mode::after,
+.glitch-hover-mode::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #0b0b0b;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  opacity: 0;
+}
+
+.glitch-hover-mode:hover::after {
+  content: attr(data-text);
+  opacity: 1;
+  left: 10px;
+  text-shadow: var(--after-shadow);
+  animation: glitch-anim var(--after-duration) infinite linear alternate-reverse;
+}
+
+.glitch-hover-mode:hover::before {
+  content: attr(data-text);
+  opacity: 1;
+  left: -10px;
+  text-shadow: var(--before-shadow);
+  animation: glitch-anim var(--before-duration) infinite linear alternate-reverse;
+}

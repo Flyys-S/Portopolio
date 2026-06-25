@@ -1,16 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import TextPressure from "../../components/TextPressure";
 import TextType from "../../components/TextType";
 import ProjectsPage from "../ProjectsPage/ProjectsPage";
-import { playPageTransition } from "../../utils/transition";
 import FullMenu from "../../components/FullMenu";
+import GlitchText from "../../components/GlitchText";
+import Waves from "../../components/Waves";
 import './LandingPage.css';
 
 export default function LandingPage() {
-    const splineSceneUrl = "https://prod.spline.design/BKpZ15L0be5l2Ade/scene.splinecode";
-    const layersRef = useRef<HTMLDivElement>(null);
-    const isBusy = useRef(false);
-    
     // Initialize state from URL hash
     const [currentView, setCurrentView] = useState<'home' | 'project'>(() => {
         return window.location.hash === '#project' ? 'project' : 'home';
@@ -26,20 +23,8 @@ export default function LandingPage() {
     }, []);
 
     const navigateTo = (view: 'home' | 'project') => {
-        if (isBusy.current || currentView === view) return;
-        isBusy.current = true;
-
-        playPageTransition(
-            layersRef.current,
-            view === 'project',
-            () => {
-                setCurrentView(view);
-                window.location.hash = view === 'project' ? 'project' : 'home';
-            },
-            () => {
-                isBusy.current = false;
-            }
-        );
+        setCurrentView(view);
+        window.location.hash = view === 'project' ? 'project' : 'home';
     };
 
     const handleNavigate = (view: 'home' | 'project' | 'about' | 'contact') => {
@@ -60,31 +45,9 @@ export default function LandingPage() {
     };
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [loadSpline, setLoadSpline] = useState(false);
-
-    useEffect(() => {
-        // Delay Spline load to allow the main thread to complete initial paints
-        const timer = setTimeout(() => {
-            setLoadSpline(true);
-        }, 1500);
-        return () => clearTimeout(timer);
-    }, []);
 
     return (
         <>
-            {/* Staggered Transition Overlay */}
-            <div ref={layersRef} className="transition-overlay">
-                <div className="transition-layer" style={{ background: '#1a1a1a', zIndex: 10 }} />
-                <div className="transition-layer" style={{ background: '#222222', zIndex: 9 }} />
-                <div className="transition-layer" style={{ background: '#ff5e3a', zIndex: 8 }} />
-            </div>
-            <div className="spline-wrapper">
-                {currentView === 'home' && loadSpline && (
-                    /* @ts-expect-error spline-viewer is a custom web component not defined in standard React types */
-                    <spline-viewer url={splineSceneUrl}></spline-viewer>
-                )}
-            </div>
-
             {/* Menu Toggle Button */}
             <div className="global-nav-trigger interactive">
                 <button className="menu-open-btn" onClick={() => setIsMenuOpen(true)} aria-label="Open menu">
@@ -102,32 +65,53 @@ export default function LandingPage() {
             />
 
             {currentView === 'home' ? (
-                <div className="app-layout">
-                    <header className="header-brand interactive" style={{ width: 'fit-content' }}>
-                        <TextType
-                            text={["Full Stack Developer", "AI Engineer"]}
-                            as="span"
-                            className="subtitle"
-                            typingSpeed={60}
-                            deletingSpeed={40}
-                            pauseDuration={1500}
-                            loop={true}
+                <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+                    {/* Full screen Background Animation Waves */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }}>
+                        <Waves
+                            lineColor="rgba(255, 255, 255, 0.18)"
+                            backgroundColor="transparent"
+                            waveSpeedX={0.01}
+                            waveSpeedY={0.005}
+                            waveAmpX={30}
+                            waveAmpY={15}
+                            xGap={15}
+                            yGap={36}
+                            friction={0.925}
+                            tension={0.005}
+                            maxCursorMove={100}
                         />
-                        <div style={{ height: '90px', width: '800px', maxWidth: '90vw' }}>
-                            <TextPressure
-                                text="RAFLY RAJWA SYAHPUTRA"
-                                fontFamily="var(--font-serif)"
-                                textColor="#FFFFFF"
-                                minFontSize={56}
+                    </div>
+
+                    <div className="app-layout" style={{ zIndex: 10 }}>
+                        <header className="header-brand interactive" style={{ width: 'fit-content' }}>
+                            <TextType
+                                text={["Full Stack Developer", "AI Engineer"]}
+                                as="span"
+                                className="subtitle"
+                                typingSpeed={60}
+                                deletingSpeed={40}
+                                pauseDuration={1500}
+                                loop={true}
                             />
-                        </div>
-                    </header>
-                    <footer className="interactive">
-                        <div className="footer-socials">
-                            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="social-link">Instagram</a>
-                            <a href="https://github.com" target="_blank" rel="noreferrer" className="social-link">GitHub</a>
-                        </div>
-                    </footer>
+                            <div style={{ width: '100%', maxWidth: '100%', margin: '1rem 0' }}>
+                                <GlitchText
+                                  speed={2.5}
+                                  enableShadows={true}
+                                  enableOnHover={false}
+                                >
+                                  RAFLY RAJWA SYAHPUTRA
+                                </GlitchText>
+                            </div>
+                            <span className="portfolio-label">Creative Web Developer & Design Portfolio ©2026</span>
+                        </header>
+                        <footer className="interactive">
+                            <div className="footer-socials">
+                                <a href="https://instagram.com" target="_blank" rel="noreferrer" className="social-link">Instagram</a>
+                                <a href="https://github.com" target="_blank" rel="noreferrer" className="social-link">GitHub</a>
+                            </div>
+                        </footer>
+                    </div>
                 </div>
             ) : (
                 <ProjectsPage onBack={() => navigateTo('home')} />

@@ -4,7 +4,6 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #0b0b0b; /* Deep dark premium background */
   color: #ffffff; /* White text color */
   z-index: 9999;
   display: flex;
@@ -14,14 +13,31 @@
   overflow: hidden;
   font-family: var(--font-sans);
   pointer-events: auto;
-  opacity: 0;
-  animation: fadeInMenu 0.3s forwards ease-out;
+  background-color: transparent;
 }
 
-@keyframes fadeInMenu {
-  to {
-    opacity: 1;
-  }
+.menu-transition-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10001;
+  clip-path: inset(50% 0%);
+  will-change: clip-path;
+  visibility: hidden;
+}
+
+.menu-content-wrapper {
+  position: relative;
+  z-index: 10002;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #0b0b0b;
+  clip-path: inset(50% 0%);
+  will-change: clip-path;
+  visibility: hidden;
 }
 
 /* Background grid lines */
