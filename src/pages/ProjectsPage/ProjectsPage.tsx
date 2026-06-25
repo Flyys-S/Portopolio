@@ -162,10 +162,28 @@ function ProjectCard({ project, isActive, onClick }: ProjectCardProps) {
 
 export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     console.log('ProjectsPage mounted, onBack handler available:', !!onBack);
   }, [onBack]);
+
+  React.useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   const projects: Project[] = [
     {
@@ -250,7 +268,7 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
       </div>
 
       {/* Horizontal Accordion / Right side */}
-      <div className="projects-carousel">
+      <div className="projects-carousel" ref={carouselRef}>
         {projects.map((project) => (
           <ProjectCard
             key={project.id}
