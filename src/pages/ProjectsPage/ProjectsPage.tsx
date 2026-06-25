@@ -169,6 +169,26 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
     console.log('ProjectsPage mounted, onBack handler available:', !!onBack);
   }, [onBack]);
 
+  const handleCardClick = (id: string, idx: number) => {
+    const isOpening = activeProjectId !== id;
+    setActiveProjectId(isOpening ? id : null);
+
+    if (isOpening && carouselRef.current) {
+      const cardWidth = 140;
+      const gap = 8;
+      const targetScroll = idx * (cardWidth + gap);
+
+      setTimeout(() => {
+        if (carouselRef.current) {
+          carouselRef.current.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  };
+
   React.useEffect(() => {
     const container = containerRef.current;
     const carousel = carouselRef.current;
@@ -271,12 +291,12 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
 
       {/* Horizontal Accordion / Right side */}
       <div className="projects-carousel" ref={carouselRef}>
-        {projects.map((project) => (
+        {projects.map((project, idx) => (
           <ProjectCard
             key={project.id}
             project={project}
             isActive={activeProjectId === project.id}
-            onClick={() => setActiveProjectId(activeProjectId === project.id ? null : project.id)}
+            onClick={() => handleCardClick(project.id, idx)}
           />
         ))}
       </div>
