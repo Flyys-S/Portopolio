@@ -46,12 +46,16 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
   const collapsedRef = useRef<HTMLDivElement>(null);
   const orangeRef = useRef<HTMLDivElement>(null);
   const orangeInnerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const yearRef = useRef<HTMLSpanElement>(null);
 
   const animationDefaults = { duration: 0.6, ease: 'expo.out' };
 
   React.useEffect(() => {
     const card = cardRef.current;
     const container = containerRef.current;
+    const title = titleRef.current;
+    const year = yearRef.current;
     if (!card || !container) return;
 
     const anim = gsap.fromTo(
@@ -74,9 +78,106 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
       }
     );
 
+    let titleAnim: gsap.core.Timeline | null = null;
+    if (title) {
+      const spans = title.querySelectorAll('span');
+      titleAnim = gsap.timeline({
+        scrollTrigger: {
+          trigger: card,
+          scroller: container,
+          horizontal: true,
+          start: 'left right',
+          end: 'right left',
+          scrub: 1
+        }
+      });
+      
+      titleAnim.fromTo(
+        spans,
+        {
+          x: 100,
+          opacity: 0,
+          rotate: 15,
+          scale: 0.8
+        },
+        {
+          x: 0,
+          opacity: 1,
+          rotate: 0,
+          scale: 1,
+          stagger: 0.03,
+          duration: 9.7, // Entrance duration proportional to screen entry (200px)
+          ease: 'power2.out'
+        }
+      ).to(
+        spans,
+        {
+          x: -100,
+          opacity: 0,
+          rotate: -15,
+          scale: 0.8,
+          stagger: 0.03,
+          duration: 6.8, // Exit duration proportional to card width exiting (140px)
+          ease: 'power2.in'
+        },
+        '+=83.5' // Extended middle visible area proportional to screen width (1720px)
+      );
+    }
+
+    let yearAnim: gsap.core.Timeline | null = null;
+    if (year) {
+      const spans = year.querySelectorAll('.year-char');
+      yearAnim = gsap.timeline({
+        scrollTrigger: {
+          trigger: card,
+          scroller: container,
+          horizontal: true,
+          start: 'left right',
+          end: 'right left',
+          scrub: 1
+        }
+      });
+
+      yearAnim.fromTo(
+        spans,
+        {
+          x: 80,
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          x: 0,
+          opacity: 1,
+          scale: 1,
+          stagger: 0.02,
+          duration: 9.7,
+          ease: 'power2.out'
+        }
+      ).to(
+        spans,
+        {
+          x: -80,
+          opacity: 0,
+          scale: 0.8,
+          stagger: 0.02,
+          duration: 6.8,
+          ease: 'power2.in'
+        },
+        '+=83.5'
+      );
+    }
+
     return () => {
       anim.scrollTrigger?.kill();
       anim.kill();
+      if (titleAnim) {
+        titleAnim.scrollTrigger?.kill();
+        titleAnim.kill();
+      }
+      if (yearAnim) {
+        yearAnim.scrollTrigger?.kill();
+        yearAnim.kill();
+      }
     };
   }, [containerRef]);
 
@@ -156,12 +257,20 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
         onMouseLeave={handleMouseLeave}
         onClick={onClick}
       >
-        <span className="collapsed-title">
-          {project.title}
+        <span className="collapsed-title" ref={titleRef}>
+          {project.title.split('').map((char, i) => (
+            <span key={i} style={{ display: 'inline-block', transformOrigin: 'center center', willChange: 'transform, opacity' }}>
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          ))}
         </span>
-        <span className="collapsed-year">
+        <span className="collapsed-year" ref={yearRef}>
           <span className="new-tag">NEW</span>{" "}
-          {project.year}
+          {project.year.split('').map((char, i) => (
+            <span key={i} className="year-char" style={{ display: 'inline-block', transformOrigin: 'center center', willChange: 'transform, opacity' }}>
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          ))}
         </span>
 
         {/* Sliding Orange Overlay inside the 140px strip */}
@@ -199,29 +308,8 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    console.log('ProjectsPage mounted, onBack handler available:', !!onBack);
-  }, [onBack]);
-
   const handleCardClick = (id: string, idx: number) => {
-    const isOpening = activeProjectId !== id;
-    setActiveProjectId(isOpening ? id : null);
-
-    if (isOpening && containerRef.current) {
-      setTimeout(() => {
-        if (containerRef.current) {
-          const cards = containerRef.current.querySelectorAll('.project-card');
-          const clickedCard = cards[idx] as HTMLElement;
-          if (clickedCard) {
-            const targetScroll = clickedCard.offsetLeft - 32;
-            containerRef.current.scrollTo({
-              left: targetScroll,
-              behavior: 'smooth'
-            });
-          }
-        }
-      }, 150);
-    }
+    setActiveProjectId(activeProjectId === id ? null : id);
   };
 
   React.useEffect(() => {
@@ -234,7 +322,6 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
       if (e.deltaY !== 0) {
         e.preventDefault();
         const maxScroll = container.scrollWidth - container.clientWidth;
-        // e.deltaY * 1.2 multiplies delta for responsive scrolling speed
         targetScroll = Math.max(0, Math.min(maxScroll, targetScroll + e.deltaY * 1.2));
 
         gsap.to(container, {
@@ -247,7 +334,6 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
     };
 
     const handleScroll = () => {
-      // Sync target scroll position if user scrolls container via other means (drag/auto-scroll)
       targetScroll = container.scrollLeft;
     };
 
