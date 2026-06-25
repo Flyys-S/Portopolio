@@ -71,8 +71,8 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
           trigger: card,
           scroller: container,
           horizontal: true,
-          start: 'left right-=80px',
-          end: 'left center+=100px',
+          start: 'left right',
+          end: 'right right',
           scrub: 1
         }
       }
@@ -106,7 +106,7 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
           rotate: 0,
           scale: 1,
           stagger: 0.03,
-          duration: 9.7, // Entrance duration proportional to screen entry (200px)
+          duration: 9.7,
           ease: 'power2.out'
         }
       ).to(
@@ -117,10 +117,10 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
           rotate: -15,
           scale: 0.8,
           stagger: 0.03,
-          duration: 6.8, // Exit duration proportional to card width exiting (140px)
+          duration: 6.8,
           ease: 'power2.in'
         },
-        '+=83.5' // Extended middle visible area proportional to screen width (1720px)
+        '+=83.5'
       );
     }
 
@@ -308,9 +308,16 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleCardClick = (id: string, idx: number) => {
+  const handleCardClick = (id: string) => {
     setActiveProjectId(activeProjectId === id ? null : id);
   };
+
+  React.useEffect(() => {
+    if (typeof onBack === 'function') {
+      const dummy = onBack;
+      console.log('onBack registered:', !!dummy);
+    }
+  }, [onBack]);
 
   React.useEffect(() => {
     const container = containerRef.current;
@@ -447,12 +454,12 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
         </div>
       </div>
 
-      {projects.map((project, idx) => (
+      {projects.map((project) => (
         <ProjectCard
           key={project.id}
           project={project}
           isActive={activeProjectId === project.id}
-          onClick={() => handleCardClick(project.id, idx)}
+          onClick={() => handleCardClick(project.id)}
           containerRef={containerRef}
         />
       ))}
