@@ -162,6 +162,7 @@ function ProjectCard({ project, isActive, onClick }: ProjectCardProps) {
 
 export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -169,19 +170,20 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   }, [onBack]);
 
   React.useEffect(() => {
-    const el = carouselRef.current;
-    if (!el) return;
+    const container = containerRef.current;
+    const carousel = carouselRef.current;
+    if (!container || !carousel) return;
 
     const handleWheel = (e: WheelEvent) => {
       if (e.deltaY !== 0) {
         e.preventDefault();
-        el.scrollLeft += e.deltaY;
+        carousel.scrollLeft += e.deltaY;
       }
     };
 
-    el.addEventListener('wheel', handleWheel, { passive: false });
+    container.addEventListener('wheel', handleWheel, { passive: false });
     return () => {
-      el.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
@@ -254,7 +256,7 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   ];
 
   return (
-    <div className="projects-container interactive">
+    <div className="projects-container interactive" ref={containerRef}>
       {/* Sidebar header / Left side */}
       <div className="projects-left-panel" style={{ paddingTop: '80px' }}>
         <div className="featured-header">
