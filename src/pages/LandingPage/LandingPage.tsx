@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import TextPressure from "../../components/TextPressure";
 import TextType from "../../components/TextType";
 import ProjectsPage from "../ProjectsPage/ProjectsPage";
 import FullMenu from "../../components/FullMenu";
