@@ -163,7 +163,6 @@ function ProjectCard({ project, isActive, onClick }: ProjectCardProps) {
 export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     console.log('ProjectsPage mounted, onBack handler available:', !!onBack);
@@ -173,14 +172,16 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
     const isOpening = activeProjectId !== id;
     setActiveProjectId(isOpening ? id : null);
 
-    if (isOpening && carouselRef.current) {
+    if (isOpening && containerRef.current) {
       const cardWidth = 140;
       const gap = 8;
-      const targetScroll = idx * (cardWidth + gap);
+      const sidebarWidth = 400;
+      const leftMargin = 32;
+      const targetScroll = sidebarWidth + leftMargin + idx * (cardWidth + gap);
 
       setTimeout(() => {
-        if (carouselRef.current) {
-          carouselRef.current.scrollTo({
+        if (containerRef.current) {
+          containerRef.current.scrollTo({
             left: targetScroll,
             behavior: 'smooth'
           });
@@ -191,13 +192,12 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
 
   React.useEffect(() => {
     const container = containerRef.current;
-    const carousel = carouselRef.current;
-    if (!container || !carousel) return;
+    if (!container) return;
 
     const handleWheel = (e: WheelEvent) => {
       if (e.deltaY !== 0) {
         e.preventDefault();
-        carousel.scrollLeft += e.deltaY;
+        container.scrollLeft += e.deltaY;
       }
     };
 
@@ -289,17 +289,14 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
         </div>
       </div>
 
-      {/* Horizontal Accordion / Right side */}
-      <div className="projects-carousel" ref={carouselRef}>
-        {projects.map((project, idx) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            isActive={activeProjectId === project.id}
-            onClick={() => handleCardClick(project.id, idx)}
-          />
-        ))}
-      </div>
+      {projects.map((project, idx) => (
+        <ProjectCard
+          key={project.id}
+          project={project}
+          isActive={activeProjectId === project.id}
+          onClick={() => handleCardClick(project.id, idx)}
+        />
+      ))}
     </div>
   );
 }
