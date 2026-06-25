@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { gsap } from 'gsap';
+import ScrollFloat from '../../components/ScrollFloat';
 import './ProjectsPage.css';
 
 interface Project {
@@ -299,7 +300,25 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
       {/* Sidebar header / Left side */}
       <div className="projects-left-panel" style={{ paddingTop: '80px' }}>
         <div className="featured-header">
-          <h2 className="featured-title">FEATURED<br />WORK</h2>
+          <h2 className="featured-title">
+            <ScrollFloat
+              animationDuration={1}
+              ease="back.inOut(2)"
+              stagger={0.03}
+              containerRef={containerRef}
+            >
+              FEATURED
+            </ScrollFloat>
+            <br />
+            <ScrollFloat
+              animationDuration={1}
+              ease="back.inOut(2)"
+              stagger={0.03}
+              containerRef={containerRef}
+            >
+              WORK
+            </ScrollFloat>
+          </h2>
           <p className="featured-desc">
             As a developer, I like to start from a blank canvas and clean data to give life to an
             impactful web application that makes your brand stand out — starting from an
