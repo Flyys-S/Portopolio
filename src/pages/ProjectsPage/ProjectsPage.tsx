@@ -193,16 +193,36 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
     const container = containerRef.current;
     if (!container) return;
 
+    let targetScroll = container.scrollLeft;
+
     const handleWheel = (e: WheelEvent) => {
       if (e.deltaY !== 0) {
         e.preventDefault();
-        container.scrollLeft += e.deltaY;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        // e.deltaY * 1.2 multiplies delta for responsive scrolling speed
+        targetScroll = Math.max(0, Math.min(maxScroll, targetScroll + e.deltaY * 1.2));
+
+        gsap.to(container, {
+          scrollLeft: targetScroll,
+          duration: 0.5,
+          ease: 'power2.out',
+          overwrite: 'auto'
+        });
       }
     };
 
+    const handleScroll = () => {
+      // Sync target scroll position if user scrolls container via other means (drag/auto-scroll)
+      targetScroll = container.scrollLeft;
+    };
+
     container.addEventListener('wheel', handleWheel, { passive: false });
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    
     return () => {
       container.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('scroll', handleScroll);
+      gsap.killTweensOf(container);
     };
   }, []);
 
