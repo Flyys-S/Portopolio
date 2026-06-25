@@ -1,46 +1,46 @@
 import { useState, useEffect } from "react";
 import TextType from "../../components/TextType";
 import ProjectsPage from "../ProjectsPage/ProjectsPage";
+import AboutPage from "../AboutPage/AboutPage";
+import ContactPage from "../ContactPage/ContactPage";
 import FullMenu from "../../components/FullMenu";
 import GlitchText from "../../components/GlitchText";
 import Waves from "../../components/Waves";
 import './LandingPage.css';
 
+type PageView = 'home' | 'project' | 'about' | 'contact';
+
 export default function LandingPage() {
     // Initialize state from URL hash
-    const [currentView, setCurrentView] = useState<'home' | 'project'>(() => {
-        return window.location.hash === '#project' ? 'project' : 'home';
+    const [currentView, setCurrentView] = useState<PageView>(() => {
+        const hash = window.location.hash.replace('#', '');
+        if (hash === 'project' || hash === 'about' || hash === 'contact') {
+            return hash;
+        }
+        return 'home';
     });
 
     // Listen to hash changes (for back/forward browser navigation)
     useEffect(() => {
         const handleHashChange = () => {
-            setCurrentView(window.location.hash === '#project' ? 'project' : 'home');
+            const hash = window.location.hash.replace('#', '');
+            if (hash === 'project' || hash === 'about' || hash === 'contact') {
+                setCurrentView(hash);
+            } else {
+                setCurrentView('home');
+            }
         };
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
 
-    const navigateTo = (view: 'home' | 'project') => {
+    const navigateTo = (view: PageView) => {
         setCurrentView(view);
-        window.location.hash = view === 'project' ? 'project' : 'home';
+        window.location.hash = view;
     };
 
-    const handleNavigate = (view: 'home' | 'project' | 'about' | 'contact') => {
-        if (view === 'home' || view === 'project') {
-            navigateTo(view);
-        } else {
-            // For about and contact, we go to home view and scroll/hash
-            navigateTo('home');
-            setTimeout(() => {
-                const element = document.getElementById(view);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    window.location.hash = view;
-                }
-            }, 500);
-        }
+    const handleNavigate = (view: PageView) => {
+        navigateTo(view);
     };
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,10 +60,11 @@ export default function LandingPage() {
             <FullMenu 
                 isOpen={isMenuOpen} 
                 onClose={() => setIsMenuOpen(false)} 
-                onNavigate={handleNavigate} 
+                onNavigate={handleNavigate}
+                currentView={currentView}
             />
 
-            {currentView === 'home' ? (
+            {currentView === 'home' && (
                 <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
                     {/* Full screen Background Animation Waves */}
                     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }}>
@@ -112,8 +113,15 @@ export default function LandingPage() {
                         </footer>
                     </div>
                 </div>
-            ) : (
+            )}
+            {currentView === 'project' && (
                 <ProjectsPage onBack={() => navigateTo('home')} />
+            )}
+            {currentView === 'about' && (
+                <AboutPage />
+            )}
+            {currentView === 'contact' && (
+                <ContactPage />
             )}
         </>
     );

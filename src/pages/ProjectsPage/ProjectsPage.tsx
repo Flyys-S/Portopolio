@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { gsap } from 'gsap';
 import './ProjectsPage.css';
 
 interface Project {
@@ -15,11 +16,154 @@ interface ProjectsPageProps {
   onBack: () => void;
 }
 
+const findClosestEdge4Way = (
+  mouseX: number,
+  mouseY: number,
+  width: number,
+  height: number
+): 'top' | 'bottom' | 'left' | 'right' => {
+  const t = mouseY;
+  const b = height - mouseY;
+  const l = mouseX;
+  const r = width - mouseX;
+  const min = Math.min(t, b, l, r);
+  if (min === l) return 'left';
+  if (min === r) return 'right';
+  if (min === t) return 'top';
+  return 'bottom';
+};
+
+interface ProjectCardProps {
+  project: Project;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+function ProjectCard({ project, isActive, onClick }: ProjectCardProps) {
+  const collapsedRef = useRef<HTMLDivElement>(null);
+  const orangeRef = useRef<HTMLDivElement>(null);
+  const orangeInnerRef = useRef<HTMLDivElement>(null);
+
+  const animationDefaults = { duration: 0.6, ease: 'expo.out' };
+
+  const handleMouseEnter = (ev: React.MouseEvent) => {
+    if (!collapsedRef.current || !orangeRef.current || !orangeInnerRef.current) return;
+    const rect = collapsedRef.current.getBoundingClientRect();
+    const edge = findClosestEdge4Way(ev.clientX - rect.left, ev.clientY - rect.top, rect.width, rect.height);
+
+    let startX = '0%';
+    let startY = '0%';
+    let innerStartX = '0%';
+    let innerStartY = '0%';
+
+    if (edge === 'left') {
+      startX = '-101%';
+      innerStartX = '101%';
+    } else if (edge === 'right') {
+      startX = '101%';
+      innerStartX = '-101%';
+    } else if (edge === 'top') {
+      startY = '-101%';
+      innerStartY = '101%';
+    } else if (edge === 'bottom') {
+      startY = '101%';
+      innerStartY = '-101%';
+    }
+
+    gsap.timeline({ defaults: animationDefaults })
+      .set(orangeRef.current, { x: startX, y: startY }, 0)
+      .set(orangeInnerRef.current, { x: innerStartX, y: innerStartY }, 0)
+      .to([orangeRef.current, orangeInnerRef.current], { x: '0%', y: '0%' }, 0);
+  };
+
+  const handleMouseLeave = (ev: React.MouseEvent) => {
+    if (!collapsedRef.current || !orangeRef.current || !orangeInnerRef.current) return;
+    const rect = collapsedRef.current.getBoundingClientRect();
+    const edge = findClosestEdge4Way(ev.clientX - rect.left, ev.clientY - rect.top, rect.width, rect.height);
+
+    let endX = '0%';
+    let endY = '0%';
+    let innerEndX = '0%';
+    let innerEndY = '0%';
+
+    if (edge === 'left') {
+      endX = '-101%';
+      innerEndX = '101%';
+    } else if (edge === 'right') {
+      endX = '101%';
+      innerEndX = '-101%';
+    } else if (edge === 'top') {
+      endY = '-101%';
+      innerEndY = '101%';
+    } else if (edge === 'bottom') {
+      endY = '101%';
+      innerEndY = '-101%';
+    }
+
+    gsap.timeline({ defaults: animationDefaults })
+      .to(orangeRef.current, { x: endX, y: endY }, 0)
+      .to(orangeInnerRef.current, { x: innerEndX, y: innerEndY }, 0);
+  };
+
+  return (
+    <div
+      className={`project-card ${isActive ? 'active' : ''}`}
+      style={{ '--accent-color': project.color } as React.CSSProperties}
+    >
+      {/* Vertical border stripe indicator */}
+      <div className="card-border-line" />
+
+      {/* Unexpanded Column View (acting as hover trigger and item click) */}
+      <div
+        className="card-collapsed-content"
+        ref={collapsedRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={onClick}
+      >
+        <span className="collapsed-title">
+          {project.title}
+        </span>
+        <span className="collapsed-year">
+          <span className="new-tag">NEW</span>{" "}
+          {project.year}
+        </span>
+
+        {/* Sliding Orange Overlay inside the 140px strip */}
+        <div className="card-orange-overlay" ref={orangeRef}>
+          <div className="card-orange-inner" ref={orangeInnerRef}>
+            <div className="card-orange-bg" />
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Horizontal View */}
+      <div className="card-expanded-content">
+        <div className="expanded-text-wrapper">
+          <h3 className="project-title">{project.title}</h3>
+          <div className="project-desc-list">
+            {project.descriptions.map((desc, i) => (
+              <p key={i} className="project-desc-item">{desc}</p>
+            ))}
+          </div>
+        </div>
+
+        <div className="project-preview-box">
+          {project.image ? (
+            <img src={project.image} alt={project.title} className="project-image" />
+          ) : (
+            <div className="project-image-placeholder" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
   React.useEffect(() => {
-    // Reference onBack to avoid unused variable error in strict compiler modes
     console.log('ProjectsPage mounted, onBack handler available:', !!onBack);
   }, [onBack]);
 
@@ -98,60 +242,23 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
         <div className="featured-header">
           <h2 className="featured-title">FEATURED<br />WORK</h2>
           <p className="featured-desc">
-            <span className="dropcap">A</span>s a developer, I like to start from a blank canvas and clean data to give life to an
+            As a developer, I like to start from a blank canvas and clean data to give life to an
             impactful web application that makes your brand stand out — starting from an
             intelligent system design that guides the project's vision into reality.
           </p>
         </div>
       </div>
 
-      {/* Accordion / Right side */}
+      {/* Horizontal Accordion / Right side */}
       <div className="projects-carousel">
-        {projects.map((project) => {
-          const isActive = activeProjectId === project.id;
-          return (
-            <div
-              key={project.id}
-              className={`project-card ${isActive ? 'active' : ''}`}
-              onClick={() => setActiveProjectId(isActive ? null : project.id)}
-              style={{ '--accent-color': project.color } as React.CSSProperties}
-            >
-              {/* Vertical border stripe indicator */}
-              <div className="card-border-line" />
-
-              {/* Unexpanded Column View */}
-              <div className="card-collapsed-content">
-                <span className="collapsed-title">
-                  {project.title}
-                </span>
-                <span className="collapsed-year">
-                  <span className="new-tag">NEW</span>{" "}
-                  {project.year}
-                </span>
-              </div>
-
-              {/* Expanded Horizontal View */}
-              <div className="card-expanded-content">
-                <div className="expanded-text-wrapper">
-                  <h3 className="project-title">{project.title}</h3>
-                  <div className="project-desc-list">
-                    {project.descriptions.map((desc, i) => (
-                      <p key={i} className="project-desc-item">{desc}</p>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="project-preview-box">
-                  {project.image ? (
-                    <img src={project.image} alt={project.title} className="project-image" />
-                  ) : (
-                    <div className="project-image-placeholder" />
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {projects.map((project) => (
+          <ProjectCard
+            key={project.id}
+            project={project}
+            isActive={activeProjectId === project.id}
+            onClick={() => setActiveProjectId(activeProjectId === project.id ? null : project.id)}
+          />
+        ))}
       </div>
     </div>
   );

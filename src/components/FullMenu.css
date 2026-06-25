@@ -100,7 +100,7 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: #d39700ff; /* Orange circle button to match marquee */
+  background-color: #ff5e3a; /* Orange close button circle */
   color: #ffffff;
   font-size: 1.8rem;
   transition: transform 0.2s ease;

@@ -7,6 +7,7 @@ interface FullMenuProps {
     isOpen: boolean;
     onClose: () => void;
     onNavigate: (view: 'home' | 'project' | 'about' | 'contact') => void;
+    currentView: 'home' | 'project' | 'about' | 'contact';
 }
 
 interface MenuItemProps {
@@ -70,7 +71,7 @@ function MenuItem({ text, marqueeText, num, view, onNavigate, onClose }: MenuIte
             <div
                 className="menu-marquee-container"
                 ref={marqueeRef}
-                style={{ backgroundColor: '#d39700ff' }}
+                style={{ backgroundColor: '#ff5e3a' }}
             >
                 <div className="menu-marquee-inner" ref={marqueeInnerRef}>
                     {[...Array(8)].map((_, idx) => (
@@ -87,9 +88,10 @@ function MenuItem({ text, marqueeText, num, view, onNavigate, onClose }: MenuIte
     );
 }
 
-export default function FullMenu({ isOpen, onClose, onNavigate }: FullMenuProps) {
+export default function FullMenu({ isOpen, onClose, onNavigate, currentView }: FullMenuProps) {
     const [localTime, setLocalTime] = useState('');
     const [isRendered, setIsRendered] = useState(isOpen);
+    const [displayedView, setDisplayedView] = useState(currentView);
     const orangePanelRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
 
@@ -108,6 +110,7 @@ export default function FullMenu({ isOpen, onClose, onNavigate }: FullMenuProps)
     useEffect(() => {
         if (isOpen) {
             setIsRendered(true);
+            setDisplayedView(currentView);
         } else if (isRendered) {
             const tl = gsap.timeline({
                 onComplete: () => {
@@ -118,7 +121,7 @@ export default function FullMenu({ isOpen, onClose, onNavigate }: FullMenuProps)
             tl.to(contentRef.current, { clipPath: 'inset(50% 0%)', duration: 0.7, ease: 'power3.inOut' }, 0);
             tl.to(orangePanelRef.current, { clipPath: 'inset(50% 0%)', duration: 0.7, ease: 'power3.inOut' }, 0.1);
         }
-    }, [isOpen, isRendered]);
+    }, [isOpen, isRendered, currentView]);
 
     useEffect(() => {
         if (isRendered && isOpen) {
@@ -137,6 +140,15 @@ export default function FullMenu({ isOpen, onClose, onNavigate }: FullMenuProps)
     }, [isRendered, isOpen]);
 
     if (!isRendered) return null;
+
+    const allMenuItems = [
+        { text: 'HOME', marqueeText: 'GO TO START', view: 'home' as const },
+        { text: 'ABOUT', marqueeText: 'GET TO KNOW ME', view: 'about' as const },
+        { text: 'PROJECTS', marqueeText: 'CREATIVE WORK', view: 'project' as const },
+        { text: 'CONTACT', marqueeText: 'GET IN TOUCH', view: 'contact' as const }
+    ];
+
+    const filteredItems = allMenuItems.filter(item => item.view !== displayedView);
 
     return (
         <div className={`full-menu-overlay ${isOpen ? 'open' : ''}`}>
@@ -164,30 +176,17 @@ export default function FullMenu({ isOpen, onClose, onNavigate }: FullMenuProps)
                 </header>
 
                 <nav className="menu-nav-links">
-                    <MenuItem
-                        text="ABOUT"
-                        marqueeText="GET TO KNOW ME"
-                        num="01"
-                        view="about"
-                        onNavigate={onNavigate}
-                        onClose={onClose}
-                    />
-                    <MenuItem
-                        text="PROJECTS"
-                        marqueeText="CREATIVE WORK"
-                        num="02"
-                        view="project"
-                        onNavigate={onNavigate}
-                        onClose={onClose}
-                    />
-                    <MenuItem
-                        text="CONTACT"
-                        marqueeText="GET IN TOUCH"
-                        num="03"
-                        view="contact"
-                        onNavigate={onNavigate}
-                        onClose={onClose}
-                    />
+                    {filteredItems.map((item, idx) => (
+                        <MenuItem
+                            key={item.view}
+                            text={item.text}
+                            marqueeText={item.marqueeText}
+                            num={String(idx + 1).padStart(2, '0')}
+                            view={item.view}
+                            onNavigate={onNavigate}
+                            onClose={onClose}
+                        />
+                    ))}
                 </nav>
 
                 <footer className="menu-footer">
