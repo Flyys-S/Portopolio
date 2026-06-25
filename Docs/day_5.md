@@ -25,3 +25,6 @@ Summary of all updates, layout enhancements, page additions, and interactive ani
 - Implemented a 4-way edge detection algorithm (`findClosestEdge4Way`) so the hover overlay slides in from the left/right/top/bottom depending on cursor approach.
 - Added smooth horizontal slide transitions (`translateX(40px)` to `0px`) for the expanded text as the card stretches open.
 - Fixed layout jumping (blinking) bugs by adding `min-width` to the CSS transition list in [ProjectsPage.css](file:///c:/Users/rafly/Documents/GitHub/Portopolio/src/pages/ProjectsPage/ProjectsPage.css), matching the `width` transition duration (0.7s).
+- Restructured layout to scroll the entire Projects Page horizontally together (placing the sidebar and cards as direct siblings in the scrollable root container), preventing cards from overlapping or covering the "FEATURED WORK" title.
+- Enlarged the sidebar width (`width: 32vw; min-width: 500px;`) with a fixed `flex-shrink: 0` property to completely eliminate large title text overflow.
+- Implemented dynamic card positioning calculations (`offsetLeft`) to ensure smooth and precise scroll-to-card actions on all screen resolutions.
