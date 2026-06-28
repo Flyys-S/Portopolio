@@ -73,7 +73,7 @@ export default function ScrollFloat({
     );
 
     return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      tl.kill();
     };
   }, [children, animationDuration, ease, stagger, containerRef]);
 

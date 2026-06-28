@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import ScrollFloat from '../../components/ScrollFloat';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '../../firebase';
 import './ProjectsPage.css';
 
 interface Project {
@@ -354,7 +356,9 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
     };
   }, []);
 
-  const projects: Project[] = [
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  const defaultProjects: Project[] = [
     {
       id: 'proj-1',
       title: 'CREATIVE HUB',
@@ -421,6 +425,28 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
       color: '#e2b05f'
     }
   ];
+
+  React.useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          const list = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as Project[];
+          setProjects(list);
+        } else {
+          setProjects(defaultProjects);
+        }
+      } catch (err) {
+        console.error("Firestore error, using default fallback data:", err);
+        setProjects(defaultProjects);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   return (
     <div className="projects-container interactive" ref={containerRef}>

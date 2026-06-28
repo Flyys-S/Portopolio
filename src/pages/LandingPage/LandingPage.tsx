@@ -6,25 +6,53 @@ import ContactPage from "../ContactPage/ContactPage";
 import FullMenu from "../../components/FullMenu";
 import GlitchText from "../../components/GlitchText";
 import Waves from "../../components/Waves";
+import AdminPage from "../AdminPage/AdminPage";
+import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import './LandingPage.css';
 
-type PageView = 'home' | 'project' | 'about' | 'contact';
+type PageView = 'home' | 'project' | 'about' | 'contact' | 'admin';
 
 export default function LandingPage() {
     // Initialize state from URL hash
     const [currentView, setCurrentView] = useState<PageView>(() => {
         const hash = window.location.hash.replace('#', '');
-        if (hash === 'project' || hash === 'about' || hash === 'contact') {
+        if (hash === 'project' || hash === 'about' || hash === 'contact' || hash === 'admin') {
             return hash;
         }
         return 'home';
     });
 
+    // Track views
+    useEffect(() => {
+        const trackView = async () => {
+            try {
+                const statsRef = doc(db, 'analytics', 'stats');
+                await updateDoc(statsRef, {
+                    views: increment(1)
+                });
+            } catch (err) {
+                // If it fails (doc doesn't exist yet), try to create it
+                try {
+                    const statsRef = doc(db, 'analytics', 'stats');
+                    await setDoc(statsRef, { views: 1 }, { merge: true });
+                } catch (e) {
+                    console.error("Error tracking view:", e);
+                }
+            }
+        };
+
+        if (!sessionStorage.getItem('tracked_view')) {
+            trackView();
+            sessionStorage.setItem('tracked_view', 'true');
+        }
+    }, []);
+
     // Listen to hash changes (for back/forward browser navigation)
     useEffect(() => {
         const handleHashChange = () => {
             const hash = window.location.hash.replace('#', '');
-            if (hash === 'project' || hash === 'about' || hash === 'contact') {
+            if (hash === 'project' || hash === 'about' || hash === 'contact' || hash === 'admin') {
                 setCurrentView(hash);
             } else {
                 setCurrentView('home');
@@ -32,6 +60,19 @@ export default function LandingPage() {
         };
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
+    // Secret Keyboard Shortcut (Ctrl + Shift + A) to access Admin Panel
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                navigateTo('admin');
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
     const navigateTo = (view: PageView) => {
@@ -61,7 +102,7 @@ export default function LandingPage() {
                 isOpen={isMenuOpen} 
                 onClose={() => setIsMenuOpen(false)} 
                 onNavigate={handleNavigate}
-                currentView={currentView}
+                currentView={currentView === 'admin' ? 'home' : currentView}
             />
 
             {currentView === 'home' && (
@@ -122,6 +163,9 @@ export default function LandingPage() {
             )}
             {currentView === 'contact' && (
                 <ContactPage />
+            )}
+            {currentView === 'admin' && (
+                <AdminPage />
             )}
         </>
     );
