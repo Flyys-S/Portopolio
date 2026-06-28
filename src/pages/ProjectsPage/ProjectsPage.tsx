@@ -1,9 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollFloat from '../../components/ScrollFloat';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
+import ProjectDetail from './ProjectDetail';
 import './ProjectsPage.css';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface Project {
   id: string;
@@ -41,9 +45,10 @@ interface ProjectCardProps {
   isActive: boolean;
   onClick: () => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  onViewDetail: () => void;
 }
 
-function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardProps) {
+function ProjectCard({ project, isActive, onClick, containerRef, onViewDetail }: ProjectCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const collapsedRef = useRef<HTMLDivElement>(null);
   const orangeRef = useRef<HTMLDivElement>(null);
@@ -63,20 +68,15 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
     const anim = gsap.fromTo(
       card,
       {
-        x: 100,
+        x: 60,
         opacity: 0
       },
       {
         x: 0,
         opacity: 1,
-        scrollTrigger: {
-          trigger: card,
-          scroller: container,
-          horizontal: true,
-          start: 'left right',
-          end: 'right right',
-          scrub: 1
-        }
+        duration: 1,
+        ease: 'power3.out',
+        delay: 0.2
       }
     );
 
@@ -88,41 +88,26 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
           trigger: card,
           scroller: container,
           horizontal: true,
-          start: 'left right',
-          end: 'right left',
-          scrub: 1
+          start: 'left 98%',
+          toggleActions: 'play none none none'
         }
       });
       
       titleAnim.fromTo(
         spans,
         {
-          x: 100,
+          y: 30,
           opacity: 0,
-          rotate: 15,
-          scale: 0.8
+          rotate: 10
         },
         {
-          x: 0,
+          y: 0,
           opacity: 1,
           rotate: 0,
-          scale: 1,
-          stagger: 0.03,
-          duration: 9.7,
-          ease: 'power2.out'
+          stagger: 0.02,
+          duration: 0.8,
+          ease: 'power3.out'
         }
-      ).to(
-        spans,
-        {
-          x: -100,
-          opacity: 0,
-          rotate: -15,
-          scale: 0.8,
-          stagger: 0.03,
-          duration: 6.8,
-          ease: 'power2.in'
-        },
-        '+=83.5'
       );
     }
 
@@ -134,43 +119,28 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
           trigger: card,
           scroller: container,
           horizontal: true,
-          start: 'left right',
-          end: 'right left',
-          scrub: 1
+          start: 'left 98%',
+          toggleActions: 'play none none none'
         }
       });
 
       yearAnim.fromTo(
         spans,
         {
-          x: 80,
-          opacity: 0,
-          scale: 0.8
+          y: 20,
+          opacity: 0
         },
         {
-          x: 0,
+          y: 0,
           opacity: 1,
-          scale: 1,
           stagger: 0.02,
-          duration: 9.7,
-          ease: 'power2.out'
+          duration: 0.8,
+          ease: 'power3.out'
         }
-      ).to(
-        spans,
-        {
-          x: -80,
-          opacity: 0,
-          scale: 0.8,
-          stagger: 0.02,
-          duration: 6.8,
-          ease: 'power2.in'
-        },
-        '+=83.5'
       );
     }
 
     return () => {
-      anim.scrollTrigger?.kill();
       anim.kill();
       if (titleAnim) {
         titleAnim.scrollTrigger?.kill();
@@ -292,6 +262,15 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
               <p key={i} className="project-desc-item">{desc}</p>
             ))}
           </div>
+          <button 
+            className="explore-detail-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetail();
+            }}
+          >
+            EXPLORE CASE STUDY <span>→</span>
+          </button>
         </div>
 
         <div className="project-preview-box">
@@ -308,7 +287,23 @@ function ProjectCard({ project, isActive, onClick, containerRef }: ProjectCardPr
 
 export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [selectedProjectDetail, setSelectedProjectDetail] = useState<Project | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const getNextProject = () => {
+    if (!selectedProjectDetail) return null;
+    const currentIndex = projects.findIndex(p => p.id === selectedProjectDetail.id);
+    if (currentIndex === -1 || projects.length <= 1) return null;
+    const nextIndex = (currentIndex + 1) % projects.length;
+    return projects[nextIndex];
+  };
+
+  const handleNextProject = () => {
+    const nextProj = getNextProject();
+    if (nextProj) {
+      setSelectedProjectDetail(nextProj);
+    }
+  };
 
   const handleCardClick = (id: string) => {
     setActiveProjectId(activeProjectId === id ? null : id);
@@ -448,47 +443,66 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
     fetchProjects();
   }, []);
 
+  const nextProject = getNextProject();
+
   return (
-    <div className="projects-container interactive" ref={containerRef}>
-      {/* Sidebar header / Left side */}
-      <div className="projects-left-panel" style={{ paddingTop: '80px' }}>
-        <div className="featured-header">
-          <h2 className="featured-title">
-            <ScrollFloat
-              animationDuration={1}
-              ease="back.inOut(2)"
-              stagger={0.03}
-              containerRef={containerRef}
-            >
-              FEATURED
-            </ScrollFloat>
-            <br />
-            <ScrollFloat
-              animationDuration={1}
-              ease="back.inOut(2)"
-              stagger={0.03}
-              containerRef={containerRef}
-            >
-              WORK
-            </ScrollFloat>
-          </h2>
-          <p className="featured-desc">
-            As a developer, I like to start from a blank canvas and clean data to give life to an
-            impactful web application that makes your brand stand out — starting from an
-            intelligent system design that guides the project's vision into reality.
-          </p>
+    <>
+      <div className="projects-container interactive" ref={containerRef}>
+        {/* Sidebar header / Left side */}
+        <div className="projects-left-panel" style={{ paddingTop: '80px' }}>
+          <div className="featured-header">
+            <h2 className="featured-title">
+              <ScrollFloat
+                animationDuration={1}
+                ease="back.inOut(2)"
+                stagger={0.03}
+                containerRef={containerRef}
+              >
+                FEATURED
+              </ScrollFloat>
+              <br />
+              <ScrollFloat
+                animationDuration={1}
+                ease="back.inOut(2)"
+                stagger={0.03}
+                containerRef={containerRef}
+              >
+                WORK
+              </ScrollFloat>
+            </h2>
+            <p className="featured-desc">
+              As a developer, I like to start from a blank canvas and clean data to give life to an
+              impactful web application that makes your brand stand out — starting from an
+              intelligent system design that guides the project's vision into reality.
+            </p>
+          </div>
         </div>
+
+        {projects.map((project) => (
+          <ProjectCard
+            key={project.id}
+            project={project}
+            isActive={activeProjectId === project.id}
+            onClick={() => handleCardClick(project.id)}
+            containerRef={containerRef}
+            onViewDetail={() => setSelectedProjectDetail(project)}
+          />
+        ))}
       </div>
 
-      {projects.map((project) => (
-        <ProjectCard
-          key={project.id}
-          project={project}
-          isActive={activeProjectId === project.id}
-          onClick={() => handleCardClick(project.id)}
-          containerRef={containerRef}
+      {selectedProjectDetail && (
+        <ProjectDetail
+          project={selectedProjectDetail}
+          onClose={() => {
+            setSelectedProjectDetail(null);
+            setTimeout(() => {
+              ScrollTrigger.refresh();
+            }, 50);
+          }}
+          onNext={handleNextProject}
+          nextProjectTitle={nextProject?.title}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 }
